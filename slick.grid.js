@@ -132,6 +132,7 @@ if (typeof Slick === "undefined") {
       defaultSortAsc: true,
       focusable: true,
       selectable: true,
+      headerFormatter: undefined,
       autoSize: {
         ignoreHeaderText: false,
         colValueArray: undefined,
@@ -338,6 +339,18 @@ if (typeof Slick === "undefined") {
       columns = treeColumns.extractColumns();
 
       updateColumnProps();
+
+      if (!Array.isArray(data)) {
+          // @todo: subscribe to other relevant events
+          data.onRowsChanged.subscribe(function (e, args) {
+              invalidateRows(args.rows);
+              render();
+          });
+          data.onRowCountChanged.subscribe(function (e, args) {
+              updateRowCount();
+              render();
+          });
+      }
 
       // validate loaded JavaScript modules against requested options
       if (options.enableColumnReorder && !$.fn.sortable) {
