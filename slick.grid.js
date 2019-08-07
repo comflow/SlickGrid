@@ -103,6 +103,7 @@ if (typeof Slick === "undefined") {
       tristateMultiColumnSort: false,
       sortColNumberInSeparateSpan: false,
       defaultFormatter: defaultFormatter,
+      defaultHeaderFormatter: defaultHeaderFormatter,
       forceSyncScrolling: false,
       addNewRowCssClass: "new-row",
       preserveCopiedSelectionOnPaste: false,
@@ -1233,60 +1234,62 @@ if (typeof Slick === "undefined") {
       }
 
       for (var i = 0; i < columns.length; i++) {
-        var m = columns[i];
+        var column = columns[i];
 
         var $headerTarget = hasFrozenColumns() ? ((i <= options.frozenColumn) ? $headerL : $headerR) : $headerL;
         var $headerRowTarget = hasFrozenColumns() ? ((i <= options.frozenColumn) ? $headerRowL : $headerRowR) : $headerRowL;
 
-        var header = $("<div class='ui-state-default slick-header-column' />")
-            .html("<span class='slick-column-name'>" + m.name + "</span>")
-            .width(m.width - headerColumnWidthDiff)
-            .attr("id", "" + uid + m.id)
-            .attr("title", m.toolTip || "")
-            .data("column", m)
-            .addClass(m.headerCssClass || "")
-            .addClass(hasFrozenColumns() && i <= options.frozenColumn? 'frozen': '')
+        var headerFormatter = column.headerFormatter || options.defaultHeaderFormatter;
+        formatterResult = headerFormatter(column, this);
+        if (formatterResult === null || formatterResult === undefined) { formatterResult = '<div/>'; }
+
+        var $header = $(formatterResult);
+        $header
+            .addClass("slick-header-column")
+            .width(column.width - headerColumnWidthDiff)
+            .attr("id", "" + uid + column.id)
+            .attr("title", column.toolTip || "")
+            .data("column", column)
+            .addClass(column.headerCssClass || "")
+            .addClass(hasFrozenColumns() && i <= options.frozenColumn ? 'frozen' : '')
             .appendTo($headerTarget);
 
-        if (options.enableColumnReorder || m.sortable) {
-          header
+        if (options.enableColumnReorder || column.sortable) {
+          $header
             .on('mouseenter', onMouseEnter)
             .on('mouseleave', onMouseLeave);
         }
 
-        if (m.sortable) {
-          header.addClass("slick-header-sortable");
-          header.append("<span class='slick-sort-indicator"
-            + (options.numberedMultiColumnSort && !options.sortColNumberInSeparateSpan ? " slick-sort-indicator-numbered" : "" ) + "' />");
-          if (options.numberedMultiColumnSort && options.sortColNumberInSeparateSpan) { header.append("<span class='slick-sort-indicator-numbered' />"); }
+        if (column.sortable) {
+          $header.addClass("slick-sortable");
         }
 
         trigger(self.onHeaderCellRendered, {
-          "node": header[0],
-          "column": m,
+          "node": $header[0],
+          "column": column,
           "grid": self
         });
 
         if (options.showHeaderRow) {
-          var headerRowCell = $("<div class='ui-state-default slick-headerrow-column l" + i + " r" + i + "'></div>")
-              .data("column", m)
+          var headerRowCell = $("<div class='slick-headerrow-column l" + i + " r" + i + "'></div>")
+              .data("column", column)
               .addClass(hasFrozenColumns() && i <= options.frozenColumn? 'frozen': '')
               .appendTo($headerRowTarget);
 
           trigger(self.onHeaderRowCellRendered, {
             "node": headerRowCell[0],
-            "column": m,
+            "column": column,
             "grid": self
           });
         }
         if (options.createFooterRow && options.showFooterRow) {
-          var footerRowCell = $("<div class='ui-state-default slick-footerrow-column l" + i   + " r" + i + "'></div>")
-              .data("column", m)
+          var footerRowCell = $("<div class='slick-footerrow-column l" + i   + " r" + i + "'></div>")
+              .data("column", column)
               .appendTo($footerRow);
 
           trigger(self.onFooterRowCellRendered, {
             "node": footerRowCell[0],
-            "column": m,
+            "column": column,
             "grid": self
           });
         }
@@ -2065,21 +2068,21 @@ if (typeof Slick === "undefined") {
       var c = columnOrIndexOrId;
       if (typeof columnOrIndexOrId === 'number') {
         c = columns[columnOrIndexOrId];
-      } 
+      }
       else if (typeof columnOrIndexOrId === 'string') {
         for (i = 0; i < columns.length; i++) {
           if (columns[i].Id === columnOrIndexOrId) { c = columns[i]; }
         }
       }
       var $gridCanvas = $(getCanvasNode(0, 0));
-      getColAutosizeWidth(c, $gridCanvas, isInit);      
+      getColAutosizeWidth(c, $gridCanvas, isInit);
     }
-    
+
     function autosizeColumns(autosizeMode, isInit) {
       //LogColWidths();
 
       autosizeMode =  autosizeMode || options.autosizeColsMode;
-      if (autosizeMode === Slick.GridAutosizeColsMode.LegacyForceFit 
+      if (autosizeMode === Slick.GridAutosizeColsMode.LegacyForceFit
       || autosizeMode === Slick.GridAutosizeColsMode.LegacyOff) {
         legacyAutosizeColumns();
         return;
@@ -2142,7 +2145,7 @@ if (typeof Slick === "undefined") {
               colWidth = c.autoSize.widthPx;
             }
             if (c.rerenderOnResize && c.width  != colWidth) { reRender = true; }
-            c.width = colWidth; 
+            c.width = colWidth;
           }
         } else if ((options.viewportSwitchToScrollModeWidthPercent && totalWidthLessSTR + strColsMinWidth > viewportWidth * options.viewportSwitchToScrollModeWidthPercent / 100)
           || (totalMinWidth > viewportWidth)) {
@@ -2170,19 +2173,19 @@ if (typeof Slick === "undefined") {
               }
             }
             if (c.rerenderOnResize && c.width  != colWidth) { reRender = true; }
-            c.width = colWidth; 
+            c.width = colWidth;
           }
         }
       }
 
       if (autosizeMode === Slick.GridAutosizeColsMode.IgnoreViewport) {
         // just size columns as-is
-        for (i = 0; i < columns.length; i++) { 
+        for (i = 0; i < columns.length; i++) {
           colWidth = columns[i].autoSize.widthPx;
           if (columns[i].rerenderOnResize && columns[i].width != colWidth) {
             reRender = true;
           }
-          columns[i].width = colWidth; 
+          columns[i].width = colWidth;
         }
       }
 
@@ -2499,7 +2502,7 @@ if (typeof Slick === "undefined") {
         }
         columns[i].width = widths[i];
       }
-      
+
       reRenderColumns(reRender);
     }
 
@@ -2622,12 +2625,12 @@ if (typeof Slick === "undefined") {
       var numberCols = options.numberedMultiColumnSort && sortColumns.length > 1;
       var headerColumnEls = $headers.children();
       headerColumnEls
-        .removeClass("slick-header-column-sorted")
-        .find(".slick-sort-indicator")
-          .removeClass("slick-sort-indicator-asc slick-sort-indicator-desc");
-      headerColumnEls
-        .find(".slick-sort-indicator-numbered")
-          .text('');
+          .removeClass("slick-sort")
+          .removeClass("slick-sort-asc")
+          .removeClass("slick-sort-desc");
+      //headerColumnEls   // @todo
+      //  .find(".slick-sort-indicator-numbered")
+      //    .text('');
 
       $.each(sortColumns, function(i, col) {
         if (col.sortAsc == null) {
@@ -2636,14 +2639,13 @@ if (typeof Slick === "undefined") {
         var columnIndex = getColumnIndex(col.columnId);
         if (columnIndex != null) {
           headerColumnEls.eq(columnIndex)
-            .addClass("slick-header-column-sorted")
-              .find(".slick-sort-indicator")
-                .addClass(col.sortAsc ? "slick-sort-indicator-asc" : "slick-sort-indicator-desc");
-          if (numberCols) {
-            headerColumnEls.eq(columnIndex)
-              .find(".slick-sort-indicator-numbered")
-                .text(i+1);
-          }
+            .addClass("slick-sort")
+            .addClass(col.sortAsc ? "slick-sort-asc" : "slick-sort-desc");
+          //if (numberCols) {     // @todo
+          //  headerColumnEls.eq(columnIndex)
+          //    .find(".slick-sort-indicator-numbered")
+          //      .text(i+1);
+          //}
         }
       });
     }
@@ -2948,12 +2950,44 @@ if (typeof Slick === "undefined") {
       }
     }
 
+    function escapeHTML(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     function defaultFormatter(row, cell, value, columnDef, dataContext, grid) {
-      if (value == null) {
-        return "";
-      } else {
-        return (value + "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-      }
+        if (value == null) {
+            return "";
+        } else {
+            return escapeHTML(value + "");
+        }
+    }
+
+    function defaultHeaderFormatter(columnDef, grid) {
+        var header = $("<div class='slick-header-column' />")
+            .html("<span class='slick-column-name'>" + escapeHTML(columnDef.name + "") + "</span>")
+            .addClass("slick-default-header-column");
+        header.append("<span class='slick-sort-indicator"
+            + (grid.options.numberedMultiColumnSort && !grid.options.sortColNumberInSeparateSpan ? " slick-sort-indicator-numbered" : "") + "' />");
+        if (grid.options.numberedMultiColumnSort && grid.options.sortColNumberInSeparateSpan) { header.append("<span class='slick-sort-indicator-numbered' />"); }
+        return header;
+    }
+
+    function getHeaderFormatter(column) {
+        // look up by id, then index
+        var columnOverrides = rowMetadata &&
+            rowMetadata.columns &&
+            (rowMetadata.columns[column.id] || rowMetadata.columns[getColumnIndex(column.id)]);
+
+        return (columnOverrides && columnOverrides.formatter) ||
+            (rowMetadata && rowMetadata.formatter) ||
+            column.formatter ||
+            (options.formatterFactory && options.formatterFactory.getFormatter(column)) ||
+            options.defaultHeaderFormatter;
     }
 
     function getFormatter(row, column) {

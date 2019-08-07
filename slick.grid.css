@@ -5,14 +5,14 @@ No built-in (selected, editable, highlight, flashing, invalid, loading, :focus) 
 classes should alter those!
 */
 
-.slick-header.ui-state-default, .slick-headerrow.ui-state-default, .slick-footerrow.ui-state-default, .slick-top-panel-scroller.ui-state-default, .slick-group-header.ui-state-default {
+.slick-header, .slick-headerrow, .slick-footerrow, .slick-top-panel-scroller, .slick-group-header {
   width: 100%;
   overflow: auto;
   position: relative;
   border-left: 0px !important;
 }
 
-.slick-header.ui-state-default {
+.slick-header {
   overflow: inherit;
 }
 
@@ -27,15 +27,16 @@ classes should alter those!
   overflow: hidden;
 }
 
-.slick-header-column.ui-state-default, .slick-group-header-column.ui-state-default {
+.slick-default-header-column, .slick-default-group-header-column {
   position: relative;
-  display: inline-block;
-  box-sizing: content-box !important; /* this here only for Firefox! */ 
+  display: block;
+  box-sizing: content-box !important; /* this here only for Firefox! */
   overflow: hidden;
   -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
-  height: 16px;
-  line-height: 16px;
+  height: 40px;
+  line-height: 40px;
+  vertical-align:middle;
   margin: 0;
   padding: 4px;
   border-right: 1px solid silver;
@@ -45,7 +46,7 @@ classes should alter those!
   float: left;
 }
 
-.slick-footerrow-column.ui-state-default {
+.slick-footerrow-column {
   -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
   margin: 0;
@@ -59,11 +60,11 @@ classes should alter those!
   vertical-align: middle;
 }
 
-.slick-headerrow-column.ui-state-default, .slick-footerrow-column.ui-state-default {
+.slick-headerrow-column, .slick-footerrow-column {
   padding: 4px;
 }
 
-.slick-header-column-sorted {
+.slick-default-header-column.slick-sort {
   font-style: italic;
 }
 
@@ -90,11 +91,11 @@ classes should alter those!
   color: #6190CD;
 }
 
-.slick-sort-indicator-desc {
+.slick-sort-desc .slick-sort-indicator {
   background: url(images/sort-desc.gif);
 }
 
-.slick-sort-indicator-asc {
+.slick-sort-asc .slick-sort-indicator {
   background: url(images/sort-asc.gif);
 }
 
