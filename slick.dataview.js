@@ -193,11 +193,10 @@
       if (ascending === false) {
         items.reverse();
       }
-      items.sort();
+      var q = ascending ? +1 : -1;
+      items.sort((a, b) => (a > b ? +q : (a < b ? -q : 0)));
       Object.prototype.toString = oldToString;
-      if (ascending === false) {
-        items.reverse();
-      }
+
       idxById = {};
       updateIdxById();
       refresh();
